@@ -1,6 +1,8 @@
-# Deploying PodInfo to UDS Core
+# Exercise
 
-## [UDS Core Docs](https://uds.defenseunicorns.com/core/)
+## Pod Info: UDS Bundle
+
+### [UDS Core Docs](https://uds.defenseunicorns.com/core/)
 
 ### Completing the Exercise
 

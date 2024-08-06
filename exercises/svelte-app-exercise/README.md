@@ -1,6 +1,8 @@
-# Exercise Svelte UI App into UDS
+# Exercise
 
-## [UDS Core Docs](https://uds.defenseunicorns.com/core/)
+## Svelte App into UDS
+
+### [UDS Core Docs](https://uds.defenseunicorns.com/core/)
 
 ### Completing the Exercise
 

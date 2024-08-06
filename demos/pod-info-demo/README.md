@@ -1,6 +1,6 @@
-# Deploying PodInfo to UDS Core
+# Deploying Pod Info into UDS Core
 
-## [UDS Core Docs](https://uds.defenseunicorns.com/core/)
+### [UDS Core Docs](https://uds.defenseunicorns.com/core/)
 
 ### Prerequisite:
 
