@@ -4,7 +4,7 @@
 
 In this tutorial, we will demonstrate the process to create a UDS (Unicorn Delivery Service) bundle for Mattermost, from defining a `uds-bundle.yaml`, integrating with associated Zarf packages, and finally building the bundle with UDS CLI commands.
 
-Although UDS (and Zarf before it) were designed to support air-gapped environments natively, this tutorial makes use of Github's container registry so an Internet connection is required. As an alternative, you could follow the Zarf tutorials at https://docs.zarf.dev/ to build the required packages ahead of time and reference them locally instead.
+Although UDS (and Zarf before it) were designed to support air-gapped environments natively, this tutorial makes use of Github's container registry so an Internet connection is required. As an alternative, you could follow the Zarf tutorials at [Zarf Docs](https://docs.zarf.dev/) to build the required packages ahead of time and reference them locally instead.
 
 ## System Requirements
 
@@ -19,16 +19,16 @@ Before beginning this tutorial you will need the following:
 - Docker installed and running (for building and testing locally)
 - K3D installed and running
 - UDS-core installed into K3D
-The `k3d-core-slim-dev` bundle will acommplish both tasks for you [K3D Core Slim Dev Bundle] (https://github.com/defenseunicorns/uds-core) as well as ensuring any required Custom Resource Definitions (CRD's) are installed as well.
+The `k3d-core-slim-dev` bundle will accomplish both tasks for you [K3D Core Slim Dev Bundle](https://github.com/defenseunicorns/uds-core) as well as ensuring any required Custom Resource Definitions (CRD's) are installed as well.
 
 
 ## Putting Together a UDS Bundle
 
-In order to create a UDS bundle, you first need to have an idea of what application(s) you want to package. In this example, we will be using Mattermost, but the steps and tools used below are applicable for other applications as well.
+In order to create a UDS bundle, you first need to have an idea of what application(s) you want to package. In this example, we will be packaging Mattermost, but the steps and tools used below are applicable for other applications as well.
 
 ### Creating the Bundle Definition
 
-A `uds-bundle.yaml` file allows us to specify bundle all required metadata and the associated set of packages we want to deploy. We start a bundle definition setting the kind to 'UDSBundle' and metadata including the `name`,`description`, and `version` of the bundle. Create a new `uds-bundle.yaml` with the following content:
+A `uds-bundle.yaml` file allows us to bundle all required metadata and the associated set of packages we want to deploy. We start a bundle definition by setting the kind to 'UDSBundle' and required metadata including the `name`,`description`, and `version` of the bundle. Create a new `uds-bundle.yaml` with the following content:
 
 ```yaml
 kind: UDSBundle
@@ -43,8 +43,8 @@ packages:
 
 ### Pre-create any namespaces that need to exist early in the installation process
 
-We use another Zarf Package Config kind to pre-create a namespace for the postgres operator.  This isn't always required but can be helpful when services reqire the presence of a namespace ahead of time (typically for cross-namespace secret storage).  
-Create a `mattermost-ns.yaml` in the namespaces directory:  
+We use a ZarfPackageConfig kind to pre-create any early namespaces.  This isn't always required but can be helpful when services require the presence of a namespace ahead of time (typically for cross-namespace secret storage).  
+Create a `mattermost-ns.yaml` in the `namespaces` directory:  
 
 ```yaml
 kind: Namespace
@@ -53,7 +53,7 @@ metadata:
   name: mattermost
 ```
 
-Create a `zarf.yaml` also in the namespaces directory:  
+Create a `zarf.yaml` also in the `namespaces` directory:  
 ```yaml
   # Deployed prior to the packages to facilitate use of the postgres-operator cross namespace secret creation
 kind: ZarfPackageConfig
@@ -73,7 +73,7 @@ components:
 
 ### Setting up Dev Secrets
 
-We use this Zarf Package Config as part of our UDS Bundle to ensure required secrets are created and made available to downstream services.  In this case we're having UDS use `kubectl` to pull a couple keys that were created by the minio install from the dev-minio namespace then save them as variables for later use.  
+We use this ZarfPackageConfig as part of our UDS Bundle to ensure required secrets are created and made available to downstream services.  In this case we're having UDS use `kubectl` to pull a couple secrets that were created by the minio install from the dev-minio namespace then save them as variables for later use.  
 Create a `zarf.yaml` file in the `dev-secrets` directory:
 
 ```yaml
@@ -102,7 +102,7 @@ components:
 
 ### Add the required packages
 
-Our Mattermost Zarf UDS package requires a few supporting packages to exist so we'll define those first since UDS packages inside a bundle are processed serially. Supporting packages in this case include pre-creation of some namespaces to support package-specific requirements, Minio (an open source AWS S3 alternative providing object storage), a PostgreSQL relational database operator, and some `secrets`.  
+Our Mattermost Zarf UDS package requires a few supporting packages to exist so we'll define those first since UDS packages inside a bundle are processed serially. Supporting packages in this case include pre-creation of some namespaces to support package-specific requirements, minio (an open source AWS S3 alternative providing object storage), a PostgreSQL relational database operator, and some secrets.  
 
 Let's add them to our UDSBundle:  
 
@@ -141,7 +141,8 @@ Let's add them to our UDSBundle:
                 version: "14"
                 ingress:
                   - remoteNamespace: mattermost
-  # Pull required secrets
+
+# Pull required secrets
   - name: dev-secrets
     path: ./dev-secrets
     ref: 0.1.0
@@ -195,9 +196,9 @@ Now let's go ahead and add our Mattermost component, add the following to the bo
 
 ### Defining Build Tasks
 
-UDS Tasks are commands or scripts that are used to perform various associated with the UDS bundle.  In this tutorial, we're using them to build each of the underlying zarf packages that we created with our `zarf.yaml` files above as well as bundle those packages into our single UDS bundle.  
+UDS Tasks are commands or scripts that are used to perform various actions associated with the UDS bundle.  In this tutorial, we're using them to build each of the underlying zarf packages that we created with our `zarf.yaml` files above as well as bundle those packages into our single UDS bundle.  
 
-Create a `tasks.yaml` file in the root directory:
+Create a `tasks.yaml` file in the top-level directory for your bundle:
 
 ```yaml
 tasks:
@@ -221,7 +222,7 @@ tasks:
 
 ### Building the UDS Bundle
 
-Now that we have created all of the artifactsd, we're ready to build the Mattermost UDS bundle, run the following command which references the tasks we created in our `tasks.yaml` above:  
+Now that we have created all of the artifacts, we're ready to build the complete Mattermost UDS bundle, run the following command which references the tasks we created in our `tasks.yaml` above:  
 
 ```bash
 uds run build-mattermost-bundle
@@ -231,7 +232,7 @@ This command will create a UDS bundle in the current directory.
 
 ## Conclusion
 
-Congratulations! You've built the Mattermost UDS bundle. Now, you can deploy this bundle using into either the K3D cluster you have waiting or another cluster of your choosing:
+Congratulations! You've built the Mattermost UDS bundle. Now, you can deploy this bundle using either the K3D cluster you have waiting or another cluster of your choosing:
 
 ```bash
 uds deploy . --confirm
@@ -244,7 +245,6 @@ If you encounter an error like "Failed to create bundle: unable to read the uds-
 For other issues, check:
 1. All required CLI tools (UDS, Zarf) are correctly installed and up to date.
 2. You have necessary permissions to pull images from specified repositories.
-3. You have install UDS-Core and the required CRD's into your kubernetes cluster.
+3. You have installed UDS-Core and the required CRD's into your kubernetes cluster.
 4. Your kubernetes cluster, if not using K3D, has a default `storageclass` set.
-5. Your network connection if having trouble pulling remote packages or images.
-
+5. Check if your network connection is having trouble pulling remote packages or images.
