@@ -19,8 +19,19 @@ Before beginning this tutorial you will need the following:
 - Docker installed and running (for building and testing locally)
 - K3D installed and running
 - UDS-core installed into K3D
-The `k3d-core-slim-dev` bundle will accomplish both tasks for you [K3D Core Slim Dev Bundle](https://github.com/defenseunicorns/uds-core) as well as ensuring any required Custom Resource Definitions (CRD's) are installed as well.
+The `k3d-core-slim-dev` bundle will accomplish both tasks for you [K3D Core Slim Dev Bundle](https://github.com/defenseunicorns/uds-core) as well as ensuring any required Custom Resource Definitions (CRD's) are installed as well.  
 
+Quick start using [Homebrew](https://brew.sh/):
+```bash
+brew tap defenseunicorns/tap && brew install \
+zarf \
+k3d \
+kubectl \
+helm \
+uds
+
+uds deploy k3d-core-slim-dev:0.25.2 --confirm
+```
 
 ## Putting Together a UDS Bundle
 
@@ -44,7 +55,7 @@ packages:
 ### Pre-create any namespaces that need to exist early in the installation process
 
 We use a ZarfPackageConfig kind to pre-create any early namespaces.  This isn't always required but can be helpful when services require the presence of a namespace ahead of time (typically for cross-namespace secret storage).  
-Create a `mattermost-ns.yaml` in the `namespaces` directory:  
+Create a `mattermost-ns.yaml` in a `namespaces` sub-directory:  
 
 ```yaml
 kind: Namespace
@@ -74,7 +85,7 @@ components:
 ### Setting up Dev Secrets
 
 We use this ZarfPackageConfig as part of our UDS Bundle to ensure required secrets are created and made available to downstream services.  In this case we're having UDS use `kubectl` to pull a couple secrets that were created by the minio install from the dev-minio namespace then save them as variables for later use.  
-Create a `zarf.yaml` file in the `dev-secrets` directory:
+Create a `zarf.yaml` file in a `dev-secrets` sub-directory:
 
 ```yaml
 kind: ZarfPackageConfig
@@ -112,7 +123,7 @@ Let's add them to our UDSBundle:
     path: ./namespaces
     ref: 0.1.0
 
-# Minio is an AWS S3 object storage alternative
+  # Minio is an AWS S3 object storage alternative
   - name: dev-minio
     repository: ghcr.io/defenseunicorns/packages/uds/dev-minio
     ref: 0.0.2
@@ -142,7 +153,7 @@ Let's add them to our UDSBundle:
                 ingress:
                   - remoteNamespace: mattermost
 
-# Pull required secrets
+  # Pull required secrets
   - name: dev-secrets
     path: ./dev-secrets
     ref: 0.1.0
@@ -158,6 +169,7 @@ Let's add them to our UDSBundle:
 Now let's go ahead and add our Mattermost component, add the following to the bottom of our `uds-bundle.yaml`, still inside the `packages` stanza at the bottom:  
 
 ```yaml
+  # Mattermost package
   - name: mattermost
     repository: ghcr.io/defenseunicorns/packages/uds/mattermost
     ref: 9.10.1-uds.0-upstream
@@ -207,12 +219,12 @@ tasks:
       - cmd: uds zarf package create . --confirm
         dir: ./namespaces
 
-- name: build-dev-secrets
+  - name: build-dev-secrets
     actions:
       - cmd: uds zarf package create . --confirm
         dir: ./dev-secrets
 
-- name: build-mattermost-bundle
+  - name: build-mattermost-bundle
     description: "Build the Mattermost UDS bundle"
     actions:
       - task: build-dev-secrets
@@ -235,8 +247,27 @@ This command will create a UDS bundle in the current directory.
 Congratulations! You've built the Mattermost UDS bundle. Now, you can deploy this bundle using either the K3D cluster you have waiting or another cluster of your choosing:
 
 ```bash
-uds deploy . --confirm
+uds deploy uds-bundle-k3d-mattermost-demo-arm64-0.0.1.tar.zst --confirm
 ```
+
+## Cleanup and Uninstall
+
+To uninstall the components you installed as part of this tutorial, you can run the following commands:
+```bash
+k3d cluster delete uds
+brew uninstall \
+uds \
+zarf \
+kubectl \
+helm \
+k3d
+
+brew untap defenseunicorns/tap 
+
+# Remove your tutorial directory
+```
+
+You can uninstall homebrew itself by following the instructions found in [Homebrew's GitHub](https://github.com/homebrew/install#uninstall-homebrew)
 
 ## Troubleshooting
 
