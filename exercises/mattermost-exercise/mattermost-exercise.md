@@ -50,6 +50,6 @@ In this example the components of this application that pull from an oci registr
 
 ```sh
 uds run build-mattermost-bundle
-uds deploy . --confirm
+uds deploy --confirm
 #open a browser to https://chat.uds.dev
 ```

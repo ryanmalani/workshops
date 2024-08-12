@@ -7,7 +7,7 @@ A mattermost server you can run on your local machine, packaged up as a single a
 ```sh
 # copy the core-slim zarf package to the local directory core-slim
 uds run build-mattermost-bundle
-uds deploy . --confirm
+uds deploy --confirm
 #open a browser to https://chat.uds.dev
 ```
 
