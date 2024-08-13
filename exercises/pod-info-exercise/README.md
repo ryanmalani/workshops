@@ -14,7 +14,6 @@ In this exercise, the goal is to package an app that has existing helm charts an
 4. The ends state is to run the follow commands and be able to access the Pod Info app in the browser with the url `podinfo.uds.dev`
 
 ```bash
-uds run deploy
 uds zarf package create
 uds zarf package deploy
 ```
